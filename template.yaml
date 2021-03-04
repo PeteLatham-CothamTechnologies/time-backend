@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  Timesheets:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      DefinitionBody:
+        openapi: '3.0'
+        info:
+          title: !Sub ${AWS::StackName}-HttpApi
+          version: '1.0'
+        paths:
+          /:
+            get:
+              responses: {}
+      FailOnWarnings: true
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref TimesheetUsers
+  TimesheetUsers:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AliasAttributes:
+        - email
+        - preferred_username
+      UserPoolName: !Sub ${AWS::StackName}-TimesheetUsers

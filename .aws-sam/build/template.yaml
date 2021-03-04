@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Outputs:
+  DeploymentHistoryTag:
+    Description: Stackery Deployment History Tag
+    Value: H2KMA8
+Resources:
+  DeploymentMarkerTagH2KMA8:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  TimesheetUsers:
+    DependsOn: DeploymentMarkerTagH2KMA8
+    Properties:
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AliasAttributes:
+      - email
+      - preferred_username
+      UserPoolName:
+        Fn::Sub: ${AWS::StackName}-TimesheetUsers
+    Type: AWS::Cognito::UserPool
+  Timesheets:
+    DependsOn: DeploymentMarkerTagH2KMA8
+    Properties:
+      DefinitionBody:
+        info:
+          title:
+            Fn::Sub: ${AWS::StackName}-HttpApi
+          version: '1.0'
+        openapi: '3.0'
+        paths:
+          /:
+            get:
+              responses: {}
+      FailOnWarnings: true
+    Type: AWS::Serverless::HttpApi
+  UserPoolClient:
+    DependsOn: DeploymentMarkerTagH2KMA8
+    Properties:
+      UserPoolId:
+        Ref: TimesheetUsers
+    Type: AWS::Cognito::UserPoolClient
+Transform: AWS::Serverless-2016-10-31
